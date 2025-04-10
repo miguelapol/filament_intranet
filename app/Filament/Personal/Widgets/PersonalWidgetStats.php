@@ -35,7 +35,10 @@ class PersonalWidgetStats extends BaseWidget
         return $approved_holidays;
     }
     protected function getTotalWorkHours(User $user){
-        $timesheets = Timesheet::where('type', 'work')->where('user_id', $user->id)->get();
+        //solo agregar que day_in y day:out no sean nulos
+        $timesheets = Timesheet::where('type', 'work')->whereNotNull('day_out')
+                                                      ->whereNotNull('day_in')
+                                                      ->where('user_id', $user->id)->get();
         $totalSeconds = 0;
         //para hacer convertido todo el dia en una unidad comun en este caso en segundos
         foreach ($timesheets as $timesheet) {
