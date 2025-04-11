@@ -9,6 +9,7 @@ use App\Models\Holiday;
 use App\Models\Timesheet;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 //Auth
 
@@ -22,7 +23,8 @@ class PersonalWidgetStats extends BaseWidget
         return [
             Stat::make('Pending Holidays', $this->getPendingHolidays(auth()->user())),
             Stat::make('Approved Holidays', $this->getApprovedHolidays(auth()->user())),
-            Stat::make('Total', $this->getTotalWorkHours(auth()->user())),
+            Stat::make('Total work', $this->getTotalWorkHours(auth()->user())),
+            Stat::make('Total pause', $this->getTotalWorkPause(auth()->user())),
         ];
     }
     protected function getPendingHolidays(User $user)
@@ -36,20 +38,36 @@ class PersonalWidgetStats extends BaseWidget
     }
     protected function getTotalWorkHours(User $user){
         //solo agregar que day_in y day:out no sean nulos
-        $timesheets = Timesheet::where('type', 'work')->whereNotNull('day_out')
-                                                      ->whereNotNull('day_in')
-                                                      ->where('user_id', $user->id)->get();
+        $timesheets = Timesheet::where('user_id', $user->id)->where('type','work')->whereDate('created_at', Carbon::today())->get();
         $totalSeconds = 0;
         //para hacer convertido todo el dia en una unidad comun en este caso en segundos
         foreach ($timesheets as $timesheet) {
-            $dayIn = strtotime($timesheet->day_in);
-            $dayOut = strtotime($timesheet->day_out);
-            $totalSeconds += ($dayOut - $dayIn);
-        }
+            $dayIn = Carbon::parse($timesheet->day_in);
+            //debugar que valor hay usando debuger
 
-        $totalHours = $totalSeconds / 3600;
-        $totalMinutes = ($totalSeconds % 3600) / 60;
-        $seconds = $totalSeconds % 60;
-        return sprintf('%d:%02d:%02d', $totalHours, $totalMinutes, $seconds);
+            $dayOut = Carbon::parse($timesheet->day_out);
+            $totalDuration=$dayOut->diffInSeconds($dayIn);
+            $totalSeconds=$totalSeconds+$totalDuration;
+        }
+       $tiempoFormato=gmdate("H:i:s", $totalSeconds);
+        return $tiempoFormato;
+    }
+    //obtener ahora el type pending
+    protected function getTotalWorkPause(User $user)
+    {
+         //solo agregar que day_in y day:out no sean nulos
+         $timesheets = Timesheet::where('user_id', $user->id)->where('type','pause')->whereDate('created_at', Carbon::today())->get();
+         $totalSeconds = 0;
+         //para hacer convertido todo el dia en una unidad comun en este caso en segundos
+         foreach ($timesheets as $timesheet) {
+             $dayIn = Carbon::parse($timesheet->day_in);
+             //debugar que valor hay usando debuger
+
+             $dayOut = Carbon::parse($timesheet->day_out);
+             $totalDuration=$dayOut->diffInSeconds($dayIn);
+             $totalSeconds=$totalSeconds+$totalDuration;
+         }
+        $tiempoFormato=gmdate("H:i:s", $totalSeconds);
+         return $tiempoFormato;
     }
 }
