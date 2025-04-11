@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Hidden;
+use Illuminate\Support\Facades\Auth;
 
 class TimesheetResource extends Resource
 {
@@ -110,6 +111,7 @@ class TimesheetResource extends Resource
     }
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('user_id', auth()->user()->id);
+        //con esto haremos tener el registro actual que se creo
+        return parent::getEloquentQuery()->where('user_id', Auth::user()->id)->orderBy('id','desc');
     }
 }
