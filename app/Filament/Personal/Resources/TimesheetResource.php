@@ -15,6 +15,14 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Hidden;
 use Illuminate\Support\Facades\Auth;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
+
+use Filament\Actions;
+
+
 
 class TimesheetResource extends Resource
 {
@@ -84,12 +92,20 @@ class TimesheetResource extends Resource
         ])
         ->actions([
             Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make()
+            Tables\Actions\DeleteAction::make(),
 
         ])
         ->bulkActions([
             Tables\Actions\BulkActionGroup::make([
                 Tables\Actions\DeleteBulkAction::make(),
+
+                ExportBulkAction::make()->exports([
+                    ExcelExport::make('table')->fromTable()
+                    ->withFilename('Timesheet_'.date('Y-m-d') . '_export')
+                     ->askForFilename()
+                     ->askForWriterType(),
+                    ExcelExport::make('form')->fromForm(),
+                ])
             ]),
         ]);
     }

@@ -199,6 +199,9 @@ class ListTimesheets extends ListRecords
                 })
                 ->requiresConfirmation(),
             Actions\CreateAction::make(),
+            \EightyNine\ExcelImport\ExcelImportAction::make()
+                ->color("primary")
+                ->use(\App\Imports\ListTimesheetsImport::class)
         ];
     }
 }

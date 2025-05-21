@@ -56,6 +56,7 @@ class PersonalWidgetStats extends BaseWidget
     protected function getTotalWorkPause(User $user)
     {
          //solo agregar que day_in y day:out no sean nulos
+         //este codigo solo contara las horas hechas al dia mostrara las horas de hoy
          $timesheets = Timesheet::where('user_id', $user->id)->where('type','pause')->whereDate('created_at', Carbon::today())->get();
          $totalSeconds = 0;
          //para hacer convertido todo el dia en una unidad comun en este caso en segundos

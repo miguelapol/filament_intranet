@@ -17,8 +17,19 @@ use Filament\Tables\Filters\SelectFilter;
 class HolidayResource extends Resource
 {
     protected static ?string $model = Holiday::class;
-
+    protected static ?string $navigationLabel = 'Vacaciones';
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
+    protected static ?string $navigationBadgeTooltip = 'The number of holidays pending';
+    public static function getNavigationBadge(): ?string
+    {
+        //solo para el usuario logeado
+        return parent::getEloquentQuery()->where('user_id', auth()->user()->id)->where('type','pending')->count();
+    }
+    public static function getNavigationBadgeColor(): ?string
+{
+    return parent::getEloquentQuery()->where('user_id', auth()->user()->id)->where('type','pending')->count()>0?'warning':'primary';
+}
+
     public static function getEloquentQuery(): Builder
 {
     //solo para el usuario logeado
@@ -104,4 +115,5 @@ class HolidayResource extends Resource
             'edit' => Pages\EditHoliday::route('/{record}/edit'),
         ];
     }
+
 }
