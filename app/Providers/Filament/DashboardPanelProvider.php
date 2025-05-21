@@ -17,6 +17,10 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Shanerbaner82\PanelRoles\PanelRoles;
+use Filament\Navigation\MenuItem;
+
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -52,6 +56,21 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->plugins([
+                FilamentShieldPlugin::make(),
+                PanelRoles::make()
+                    ->roleToAssign('super_admin')
+                    ->restrictedRoles(['super_admin']),
+            ])
+            ->userMenuItems([
+                MenuItem::make('Admin')
+                    ->url('/personal')
+                    ->icon('heroicon-o-user-group')
+                    ->label('Personal')
+                    ->visible(fn (): bool => auth()->user()?->hasAnyRole([
+                        'super_admin',
+                    ])),
             ]);
     }
 }

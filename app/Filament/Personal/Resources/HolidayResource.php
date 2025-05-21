@@ -12,12 +12,24 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\SelectFilter;
 
 class HolidayResource extends Resource
 {
     protected static ?string $model = Holiday::class;
+    protected static ?string $navigationLabel = 'Vacaciones';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
+    protected static ?string $navigationBadgeTooltip = 'The number of holidays pending';
+    public static function getNavigationBadge(): ?string
+    {
+        //solo para el usuario logeado
+        return parent::getEloquentQuery()->where('user_id', auth()->user()->id)->where('type','pending')->count();
+    }
+    public static function getNavigationBadgeColor(): ?string
+{
+    return parent::getEloquentQuery()->where('user_id', auth()->user()->id)->where('type','pending')->count()>0?'warning':'primary';
+}
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     public static function getEloquentQuery(): Builder
 {
     //solo para el usuario logeado
@@ -28,8 +40,14 @@ class HolidayResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                //
+             ->schema([
+                Forms\Components\Select::make('calendar_id')
+                    //->label('Calendario')
+                    //aqui cambiomos en español
+                    ->relationship(name:'calendar',titleAttribute:'name')
+                    ->required(),
+                Forms\Components\DatePicker::make('day')
+                    ->required(),
             ]);
     }
 
@@ -38,9 +56,6 @@ class HolidayResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('calendar.name')
-                ->searchable()
-                ->sortable(),
-            Tables\Columns\TextColumn::make('user.name')
                 ->searchable()
                 ->sortable(),
             Tables\Columns\TextColumn::make('day')
@@ -65,16 +80,24 @@ class HolidayResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+                //filtros
+                           SelectFilter::make('type')
+                           ->options([
+                                   'decline' => 'Decline',
+                                   'approved' => 'Approved',
+                                   'pending' => 'Pending',
+                           ]),
+           ])
+           ->actions([
+               Tables\Actions\EditAction::make(),
+               //delete
+               Tables\Actions\DeleteAction::make(),
+           ])
+           ->bulkActions([
+               Tables\Actions\BulkActionGroup::make([
+                   Tables\Actions\DeleteBulkAction::make(),
+               ]),
+           ]);
     }
 
     public static function getRelations(): array
@@ -92,4 +115,5 @@ class HolidayResource extends Resource
             'edit' => Pages\EditHoliday::route('/{record}/edit'),
         ];
     }
+
 }
