@@ -4,7 +4,7 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-
+use BezhanSalleh\PanelSwitch\PanelSwitch;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -22,7 +22,15 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-
-        //
+        PanelSwitch::configureUsing(function (PanelSwitch $panelSwitch) {
+    $panelSwitch
+        ->modalWidth('sm')
+        ->slideOver()
+        ->visible(fn (): bool => auth()->user()?->hasAnyRole([
+            'super_admin',
+        ]));
+});
     }
+
+
 }
