@@ -166,6 +166,7 @@ class ListTimesheets extends ListRecords
                 })
                 ->requiresConfirmation(),
             Action::make('stopPause')
+
                 ->label('Detener pausar')->color('info')
                 ->visible($lastimeSheet->day_out == null && $lastimeSheet->type == 'pause')
                 ->action(function(){
@@ -198,7 +199,9 @@ class ListTimesheets extends ListRecords
                         ->send();
                 })
                 ->requiresConfirmation(),
+            //importar excel
             Actions\CreateAction::make(),
+
             \EightyNine\ExcelImport\ExcelImportAction::make()
                 ->color("primary")
                 ->use(\App\Imports\ListTimesheetsImport::class)

@@ -101,9 +101,9 @@ class TimesheetResource extends Resource
 
                 ExportBulkAction::make()->exports([
                     ExcelExport::make('table')->fromTable()
-                    ->withFilename('Timesheet_'.date('Y-m-d') . '_export')
-                     ->askForFilename()
-                     ->askForWriterType(),
+                             ->withFilename('Timesheet_'.date('Y-m-d') . '_export')
+                             ->askForFilename()
+                            ->askForWriterType(),
                     ExcelExport::make('form')->fromForm(),
                 ])
             ]),
